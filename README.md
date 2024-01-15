@@ -2,6 +2,9 @@
 
 Get report of Web vitals for multiple URLS
 
+## Demo Link
+https://www.loom.com/share/db904cdca6ab41b4988117a9ef337885?sid=1d7d49f9-c001-49a0-914e-cac8f8f5fa72
+
 ## DESIGN DOCUMENTATION
 
 - Refer this link for the [Design Documentation](./DESIGN_DOCUMENT.md) of this App
