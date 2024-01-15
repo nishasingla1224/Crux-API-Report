@@ -4,7 +4,7 @@ Get report of Web vitals for multiple URLS
 
 ## DESIGN DOCUMENTATION
 
-- Refer this link for the [Design Documentation](../DESIGN_DOCUMENT.md) of this App
+- Refer this link for the [Design Documentation](./DESIGN_DOCUMENT.md) of this App
 
 ## Steps to Run the App
 
