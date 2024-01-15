@@ -42,7 +42,7 @@ app.get("/api/data", async (req, res, next) => {
     res.end(JSON.stringify(wrappedData));
     next();
   } catch (e) {
-    res.status(400).send({ error: "Bad Request" });
+    res.status(400).send({ url: req.query.url, error: "Bad Request" });
     next();
   }
 });

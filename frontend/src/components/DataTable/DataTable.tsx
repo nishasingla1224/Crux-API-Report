@@ -8,63 +8,76 @@ import {
   TableRow,
   Paper,
   TableSortLabel,
+  Link,
+  SelectChangeEvent,
 } from "@mui/material";
 import {
   CruxApiComponentProps,
-  CruxApiResponse,
   CruxPropertyName,
   Direction,
   IMetric,
 } from "./types";
-import { getPropertyColor } from "../../utils/dataTableUtil";
-import { metricKeyDisplayNameMap } from "./constants";
+import {
+  getMetricImprovementDocLink,
+  getPropertyColor,
+  getScore,
+  getSortedTableData,
+} from "../../utils/dataTableUtil";
+import {
+  metricKeyDisplayNameMap,
+  metricsList,
+  originStyles,
+  scoreStyles,
+} from "./constants";
+import MetricFilter from "../MetricFilter/Filter";
 
 const DataTable = ({ tableData }: CruxApiComponentProps) => {
   const [orderBy, setOrderBy] = useState<string>("url");
   const [order, setOrder] = useState("asc");
+
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(metricsList);
+
+  const handleMetricChange = (
+    event: SelectChangeEvent<typeof selectedMetrics>
+  ) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedMetrics(
+      // On autofill we get a stringified value.
+      typeof value === "string" ? value.split(",") : value
+    );
+  };
 
   const handleSort = (property: string) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
-  const sortedData = [...tableData].sort(
-    (a: CruxApiResponse, b: CruxApiResponse) => {
-      if (orderBy === "url") {
-        const aValue = a?.key.origin;
-        const bValue = b?.key.origin;
-        return order === "asc"
-          ? bValue.localeCompare(aValue)
-          : aValue.localeCompare(bValue);
-      } else {
-        const aMetric: IMetric =
-          a.metrics[orderBy as unknown as CruxPropertyName];
-        const bMetric: IMetric =
-          b.metrics[orderBy as unknown as CruxPropertyName];
 
-        const aValue = aMetric?.percentiles?.p75;
-        const bValue = bMetric?.percentiles?.p75;
-        return order === "asc" ? aValue - bValue : bValue - aValue;
-      }
-    }
-  );
+  const sortedData = getSortedTableData(tableData, orderBy, order);
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>
-              <TableSortLabel
-                active={orderBy === "url"}
-                onClick={() => handleSort("url")}
-                direction={order as Direction}
-              >
-                Url
-              </TableSortLabel>
-            </TableCell>
-            {Object.keys(tableData[0].metrics ?? []).map(
-              (currentMetricName) => {
+    <>
+      <MetricFilter
+        metricName={selectedMetrics}
+        handleChange={handleMetricChange}
+      />
+
+      <TableContainer component={Paper} className="mt20">
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <TableSortLabel
+                  active={orderBy === "url"}
+                  onClick={() => handleSort("url")}
+                  direction={order as Direction}
+                >
+                  <strong>URL</strong>
+                </TableSortLabel>
+              </TableCell>
+              {selectedMetrics.map((currentMetricName) => {
                 return (
                   <TableCell>
                     <TableSortLabel
@@ -72,51 +85,78 @@ const DataTable = ({ tableData }: CruxApiComponentProps) => {
                       onClick={() => handleSort(currentMetricName)}
                       direction={order as Direction}
                     >
-                      {
-                        metricKeyDisplayNameMap[
-                          currentMetricName as string as CruxPropertyName
-                        ]
-                      }
+                      <strong>
+                        {
+                          metricKeyDisplayNameMap[
+                            currentMetricName as string as CruxPropertyName
+                          ]
+                        }
+                      </strong>
                     </TableSortLabel>
                   </TableCell>
                 );
-              }
-            )}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sortedData.map((row, index) => {
-            const {
-              metrics,
-              key: { origin },
-            } = row;
-            return (
-              <TableRow key={index}>
-                <TableCell>{origin}</TableCell>
-                {Object.keys(metrics ?? []).map((currentMetricName: string) => {
-                  const currentMetric: IMetric =
-                    metrics[currentMetricName as unknown as CruxPropertyName];
-                  const percentile: number = currentMetric?.percentiles.p75;
-                  return (
-                    <TableCell
-                      style={{
-                        color: getPropertyColor(
+              })}
+              <TableCell>
+                <TableSortLabel
+                  active={orderBy === "score"}
+                  onClick={() => handleSort("score")}
+                  direction={order as Direction}
+                >
+                  <strong>Relative Weighted Score</strong>
+                </TableSortLabel>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {sortedData.map((row, index) => {
+              const {
+                metrics,
+                key: { origin },
+              } = row;
+              return (
+                <TableRow key={index}>
+                  <TableCell style={originStyles}>{origin}</TableCell>
+                  {selectedMetrics.map((currentMetricName: string) => {
+                    const currentMetric: IMetric =
+                      metrics[currentMetricName as unknown as CruxPropertyName];
+                    const percentile: number = currentMetric?.percentiles.p75;
+                    return (
+                      <TableCell
+                        style={{
+                          color: getPropertyColor(
+                            currentMetricName as CruxPropertyName,
+                            percentile
+                          ),
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {(getMetricImprovementDocLink(
                           currentMetricName as CruxPropertyName,
                           percentile
-                        ),
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {percentile}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+                        ) === "" &&
+                          percentile) || (
+                          <Link
+                            href={getMetricImprovementDocLink(
+                              currentMetricName as CruxPropertyName,
+                              percentile
+                            )}
+                            color="inherit"
+                            target="_blank"
+                          >
+                            {percentile}
+                          </Link>
+                        )}
+                      </TableCell>
+                    );
+                  })}
+                  <TableCell style={scoreStyles}>{getScore(row)}</TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
   );
 };
 export default DataTable;

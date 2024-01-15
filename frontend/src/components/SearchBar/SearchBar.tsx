@@ -1,14 +1,14 @@
-// src/SearchInput.tsx
 import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { SearchInputProps } from "./types";
+import { Stack } from "@mui/material";
+import { searchBtnStyles, searchFieldStyles } from "./constants";
 
 const SearchBar: React.FC<SearchInputProps> = ({ onSearch }) => {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const handleSearch = () => {
-    // Call the onSearch callback with the current search query
     onSearch(searchQuery);
   };
 
@@ -17,22 +17,23 @@ const SearchBar: React.FC<SearchInputProps> = ({ onSearch }) => {
   };
 
   return (
-    <div>
+    <Stack direction="row">
       <TextField
-        label="Search"
+        label="Enter Comma separated Urls"
         variant="outlined"
         value={searchQuery}
+        style={searchFieldStyles}
         onChange={handleInputChange}
       />
       <Button
         variant="contained"
         color="primary"
         onClick={handleSearch}
-        style={{ marginLeft: "8px" }}
+        style={searchBtnStyles}
       >
         Search
       </Button>
-    </div>
+    </Stack>
   );
 };
 

@@ -20,6 +20,7 @@ export type CruxPropertyName =
   | "interaction_to_next_paint";
 
 export interface CruxApiValue {
+  url: any;
   record: CruxApiResponse;
 }
 interface Date {
@@ -47,4 +48,12 @@ export type Direction = "asc" | "desc";
 export interface ThresholdInterface {
   firstThreshold: number;
   secondThreshold: number;
+}
+export interface INormalizedMetric {
+  first_contentful_paint: number;
+  largest_contentful_paint: number;
+  cumulative_layout_shift: number;
+  experimental_time_to_first_byte: number;
+  first_input_delay: number;
+  interaction_to_next_paint: number;
 }
