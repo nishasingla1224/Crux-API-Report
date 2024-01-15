@@ -13,6 +13,8 @@ https://www.loom.com/share/db904cdca6ab41b4988117a9ef337885?sid=1d7d49f9-c001-49
 
 - Clone the repository in your local
 - Open Terminal and go to backend folder by using command `cd backend`
+- Open index.js file and uncomment the line 8 to run the project
+- Go to terminal
 - Run `npm install`
 - Run `npm run start`
 - Then, go to frontend folder from root, by using command `cd frontend`
